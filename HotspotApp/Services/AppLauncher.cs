@@ -10,6 +10,14 @@ public static class AppLauncher
 {
     public static void Run(string[] args)
     {
+        // O auxiliar não disputa o mutex da UI nem instala o serviço Windows.
+        if (args.Length > 0 && args[0] == "--hotspot-supervisor")
+        {
+            Infrastructure.Supervision.SupervisorEntry.Run(args);
+            return;
+        }
+        if (!LanguagePreferences.WaitForPreviousUi(args))
+            return;
         var serviceMode = args.Contains("--service") || !Environment.UserInteractive;
         var mutexName = serviceMode
             ? $"Global\\{AppConstants.AppName}_Service_Mutex"

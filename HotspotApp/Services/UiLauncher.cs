@@ -3,8 +3,6 @@ using HotspotApp.Localization;
 using HotspotApp.Logging;
 using HotspotApp.Services.UI;
 using Microsoft.UI.Dispatching;
-using Windows.Globalization;
-using Windows.System.UserProfile;
 
 namespace HotspotApp.Services;
 
@@ -13,9 +11,12 @@ public static class UiLauncher
     public static void Run(string[] args)
     {
         App.StartInTray = args.Contains("--tray");
+        App.StartInSettings = args.Contains("--settings");
+        LanguagePreferences.Initialize();
 
         LoggingBootstrapper.InitializeLogLevelAsync().GetAwaiter().GetResult();
         AppServices.Initialize();
+        ManualTestDiagnostics.Write("Interface iniciada");
 
         AppDomain.CurrentDomain.UnhandledException += (_, eventArgs) =>
         {
@@ -42,7 +43,6 @@ public static class UiLauncher
         };
 
         global::WinRT.ComWrappersSupport.InitializeComWrappers();
-        ApplyDefaultLanguage();
 
         Microsoft.UI.Xaml.Application.Start(p =>
         {
@@ -68,20 +68,4 @@ public static class UiLauncher
         });
     }
 
-    private static void ApplyDefaultLanguage()
-    {
-        try
-        {
-            var preferred = GlobalizationPreferences.Languages;
-            var available = ApplicationLanguages.ManifestLanguages;
-            var selected = preferred.FirstOrDefault(lang =>
-                available.Any(av => string.Equals(av, lang, StringComparison.OrdinalIgnoreCase))
-            );
-            if (!string.IsNullOrWhiteSpace(selected))
-            {
-                ApplicationLanguages.PrimaryLanguageOverride = selected;
-            }
-        }
-        catch { }
-    }
 }

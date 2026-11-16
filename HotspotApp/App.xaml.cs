@@ -11,6 +11,7 @@ namespace HotspotApp;
 public partial class App : Application
 {
     public static bool StartInTray { get; set; }
+    public static bool StartInSettings { get; set; }
     public static MainWindow? CurrentWindow { get; set; }
     public static IServiceProvider Services => AppServices.Services;
 

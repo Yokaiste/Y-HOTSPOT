@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using HotspotApp.Config;
 using HotspotApp.Constants;
 using HotspotApp.Localization;
@@ -21,6 +22,47 @@ public sealed partial class SettingsViewModel : ViewModelBase, ViewModelBase.IIn
     private readonly ServiceStateManager _serviceStateManager;
     private readonly FileExplorerService _fileExplorerService;
     private readonly ILogger<SettingsViewModel> _logger;
+    private IReadOnlyList<SelectionOption<int>>? _channelOptions;
+    // ComboBox selection uses object identity: reuse these instances until the band changes.
+    public IReadOnlyList<SelectionOption<int>> ChannelOptions => _channelOptions ??= (SelectedBand?.Value == TetheringWiFiBand.FiveGigahertz
+        ? new[] { 0 }.Concat(ChannelRecoveryPolicy.FiveGhzChannels)
+        : SelectedBand?.Value == TetheringWiFiBand.TwoPointFourGigahertz ? Enumerable.Range(0, 14) : new[] { 0 })
+        .Select(channel => new SelectionOption<int>
+        {
+            Value = channel,
+            Label = channel == 0 ? AppStrings.Get("Text_ChannelAuto") : channel.ToString(),
+        }).ToArray();
+    private SelectionOption<int>? _selectedChannel;
+    private (int Channel, Guid? Adapter)? _acknowledgedChannel;
+    private bool _channelWarningOpen;
+    public SelectionOption<int>? SelectedChannel
+    {
+        get => _selectedChannel;
+        set
+        {
+            if (_selectedChannel?.Value != value?.Value) _acknowledgedChannel = null;
+            SetProperty(ref _selectedChannel, value);
+        }
+    }
+
+    public async Task<bool> ConfirmManualChannelAsync()
+    {
+        var choice = (Channel: SelectedChannel?.Value ?? 0, Adapter: SelectedTarget?.Value);
+        if (choice.Channel == 0 || _acknowledgedChannel == choice) return true;
+        if (_channelWarningOpen) return false;
+        _channelWarningOpen = true;
+        try
+        {
+            if (await _dialogService.ShowManualChannelWarningAsync())
+            {
+                _acknowledgedChannel = choice;
+                return true;
+            }
+            SelectedChannel = ChannelOptions.First(o => o.Value == 0);
+            return false;
+        }
+        finally { _channelWarningOpen = false; }
+    }
     private string _ssid = string.Empty;
     private string _passphrase = string.Empty;
     private SelectionOption<TetheringWiFiAuthenticationKind>? _selectedAuthentication;
@@ -30,7 +72,61 @@ public sealed partial class SettingsViewModel : ViewModelBase, ViewModelBase.IIn
     private double _maxClientCount = AppConstants.DefaultMaxClientCount;
     private bool _enableService;
     private bool _disableAutoConfig;
+    private bool _useCustomDns;
+    public bool UseCustomDns { get => _useCustomDns; set { SetProperty(ref _useCustomDns, value); OnPropertyChanged(nameof(DnsOptionsVisibility)); OnPropertyChanged(nameof(ManualDnsVisibility)); } }
+    public IReadOnlyList<SelectionOption<bool>> DnsModeOptions { get; } = new[]
+    {
+        new SelectionOption<bool> { Value = false, Label = AppStrings.Get("Text_DnsModeAutomatic") },
+        new SelectionOption<bool> { Value = true, Label = AppStrings.Get("Text_DnsModeManual") },
+    };
+    private SelectionOption<bool>? _selectedDnsMode;
+    public SelectionOption<bool>? SelectedDnsMode { get => _selectedDnsMode; set { SetProperty(ref _selectedDnsMode, value); OnPropertyChanged(nameof(ManualDnsVisibility)); } }
+    private string _preferredDns = "", _alternateDns = "";
+    public string PreferredDns { get => _preferredDns; set => SetProperty(ref _preferredDns, value); }
+    public string AlternateDns { get => _alternateDns; set => SetProperty(ref _alternateDns, value); }
+    public Visibility DnsOptionsVisibility => UseCustomDns ? Visibility.Visible : Visibility.Collapsed;
+    public Visibility ManualDnsVisibility => UseCustomDns && SelectedDnsMode?.Value == true ? Visibility.Visible : Visibility.Collapsed;
     private bool _forceLanFallback;
+    private bool _applySystemOptimizations;
+    private readonly ManualHotspotSession _manualSession;
+    private readonly WslDnsRepairService _dnsRepair;
+    private string? _dnsStatus;
+    private SelectionOption<Guid>? _selectedUpstream;
+    private SelectionOption<Guid>? _selectedTarget;
+    private string _testStatus = AppStrings.Get("Text_TestIdle");
+    public ObservableCollection<SelectionOption<Guid>> UpstreamOptions { get; } = [];
+    public ObservableCollection<SelectionOption<Guid>> TargetOptions { get; } = [];
+    public SelectionOption<Guid>? SelectedUpstream { get => _selectedUpstream; set => SetProperty(ref _selectedUpstream, value); }
+    public SelectionOption<Guid>? SelectedTarget { get => _selectedTarget; set => SetProperty(ref _selectedTarget, value); }
+    public bool ApplySystemOptimizations { get => _applySystemOptimizations; set => SetProperty(ref _applySystemOptimizations, value); }
+    public string TestStatus { get => _testStatus; set => SetProperty(ref _testStatus, value); }
+    public AsyncRelayCommand ToggleHotspotCommand { get; }
+    private string? _hotspotAction;
+    public bool CanToggleHotspot => !IsBusy;
+    public Visibility ApplyHotspotVisibility => CanStopHotspot ? Visibility.Visible : Visibility.Collapsed;
+    public bool CanStopHotspot => _manualSession.OwnsSession;
+    public string HotspotButtonLabel => AppStrings.Get(_hotspotAction
+        ?? (CanStopHotspot ? "Text_StopHotspotButton" : "Text_StartHotspotButton"));
+    public Microsoft.UI.Xaml.Media.Brush HotspotButtonBackground => CanStopHotspot
+        ? new Microsoft.UI.Xaml.Media.SolidColorBrush(Windows.UI.Color.FromArgb(255, 196, 43, 28))
+        : (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["AccentFillColorDefaultBrush"];
+    public AsyncRelayCommand RefreshTestCommand { get; }
+    public AsyncRelayCommand RefreshAdaptersCommand { get; }
+    private SelectionOption<string>? _selectedLanguage;
+
+    public IReadOnlyList<SelectionOption<string>> LanguageOptions { get; } =
+    [
+        new() { Value = "en-US", Label = "English" },
+        new() { Value = "pt-BR", Label = "Português (Brasil)" },
+    ];
+
+    public SelectionOption<string>? SelectedLanguage
+    {
+        get => _selectedLanguage;
+        set => SetProperty(ref _selectedLanguage, value);
+    }
+
+    public AsyncRelayCommand ApplyLanguageCommand { get; }
 
     private readonly ServiceManager _serviceManager;
 
@@ -40,7 +136,9 @@ public sealed partial class SettingsViewModel : ViewModelBase, ViewModelBase.IIn
         ServiceStateManager serviceStateManager,
         ServiceManager serviceManager,
         FileExplorerService fileExplorerService,
-        ILogger<SettingsViewModel> logger
+        ILogger<SettingsViewModel> logger,
+        ManualHotspotSession manualSession,
+        WslDnsRepairService dnsRepair
     )
     {
         _dialogService = dialogService;
@@ -49,6 +147,23 @@ public sealed partial class SettingsViewModel : ViewModelBase, ViewModelBase.IIn
         _serviceManager = serviceManager;
         _fileExplorerService = fileExplorerService;
         _logger = logger;
+        _manualSession = manualSession;
+        _dnsRepair = dnsRepair;
+        ToggleHotspotCommand = new AsyncRelayCommand(() =>
+            _manualSession.OwnsSession ? StopTestAsync() : StartTestAsync());
+        PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName != nameof(IsBusy)) return;
+            OnPropertyChanged(nameof(CanToggleHotspot));
+            OnPropertyChanged(nameof(CanStopHotspot));
+            OnPropertyChanged(nameof(ApplyHotspotVisibility));
+            OnPropertyChanged(nameof(HotspotButtonLabel));
+            OnPropertyChanged(nameof(HotspotButtonBackground));
+        };
+        RefreshTestCommand = new AsyncRelayCommand(RefreshTestAsync);
+        RefreshAdaptersCommand = new AsyncRelayCommand(RefreshAdaptersAsync);
+        if (_manualSession.OwnsSession)
+            _testStatus = AppStrings.Get("Text_TestActive");
 
         AuthenticationOptions = ConfigOptions.AuthenticationOptions;
         BandOptions = ConfigOptions.BandOptions;
@@ -58,16 +173,18 @@ public sealed partial class SettingsViewModel : ViewModelBase, ViewModelBase.IIn
         // Default selection
         _selectedAuthentication = AuthenticationOptions[0];
         _selectedBand = BandOptions[0];
+        _selectedChannel = ChannelOptions[0];
         _selectedDisconnectMode = DisconnectOptions[0];
         _selectedLogLevel = LogLevelOptions[0];
 
         GeneratePasswordCommand = new AsyncRelayCommand(GeneratePasswordAsync);
         CopySsidCommand = new AsyncRelayCommand(CopySsidAsync);
-        CopyPasswordCommand = new AsyncRelayCommand(CopyPasswordAsync);
         SaveCommand = new AsyncRelayCommand(SaveAsync);
         ShowQrCodeCommand = new AsyncRelayCommand(ShowQrCodeAsync);
         ResetCommand = new AsyncRelayCommand(ResetAsync);
         OpenConfigCommand = new AsyncRelayCommand(OpenConfigAsync);
+        _selectedLanguage = LanguageOptions.First(option => option.Value == LanguagePreferences.CurrentLanguage);
+        ApplyLanguageCommand = new AsyncRelayCommand(ApplyLanguageAsync);
     }
 
     public IReadOnlyList<
@@ -79,7 +196,6 @@ public sealed partial class SettingsViewModel : ViewModelBase, ViewModelBase.IIn
 
     public AsyncRelayCommand GeneratePasswordCommand { get; }
     public AsyncRelayCommand CopySsidCommand { get; }
-    public AsyncRelayCommand CopyPasswordCommand { get; }
     public AsyncRelayCommand SaveCommand { get; }
     public AsyncRelayCommand ShowQrCodeCommand { get; }
     public AsyncRelayCommand ResetCommand { get; }
@@ -106,7 +222,14 @@ public sealed partial class SettingsViewModel : ViewModelBase, ViewModelBase.IIn
     public SelectionOption<TetheringWiFiBand>? SelectedBand
     {
         get => _selectedBand;
-        set => SetProperty(ref _selectedBand, value);
+        set
+        {
+            if (!SetProperty(ref _selectedBand, value)) return;
+            var previous = SelectedChannel?.Value ?? 0;
+            _channelOptions = null;
+            OnPropertyChanged(nameof(ChannelOptions));
+            SelectedChannel = ChannelOptions.FirstOrDefault(option => option.Value == previous) ?? ChannelOptions[0];
+        }
     }
 
     public SelectionOption<DisconnectWirelessMode>? SelectedDisconnectMode
@@ -194,6 +317,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, ViewModelBase.IIn
             option.Value == config.AuthenticationKind
         );
         SelectedBand = BandOptions.FirstOrDefault(option => option.Value == config.Band);
+        SelectedChannel = ChannelOptions.FirstOrDefault(option => option.Value == config.Channel) ?? ChannelOptions[0];
         SelectedLogLevel = LogLevelOptions.FirstOrDefault(option =>
             option.Value == config.LogLevel
         );
@@ -202,7 +326,18 @@ public sealed partial class SettingsViewModel : ViewModelBase, ViewModelBase.IIn
         );
         MaxClientCount = config.MaxClientCount;
         DisableAutoConfig = config.DisableAutoConfig;
+        UseCustomDns = config.UseCustomDns;
+        SelectedDnsMode = DnsModeOptions.Single(o => o.Value == config.UseManualDns);
+        PreferredDns = config.PreferredDns;
+        AlternateDns = config.AlternateDns;
         ForceLanFallback = config.ForceLanFallback;
+        ApplySystemOptimizations = config.ApplySystemOptimizations;
+        await RefreshAdaptersAsync();
+        var defaultUpstream = Windows.Networking.Connectivity.NetworkInformation.GetInternetConnectionProfile()?.NetworkAdapter?.NetworkAdapterId;
+        SelectedUpstream = UpstreamOptions.FirstOrDefault(o => o.Value == (config.UpstreamAdapterId ?? defaultUpstream));
+        SelectedTarget = config.TargetAdapterId.HasValue
+            ? TargetOptions.FirstOrDefault(o => o.Value == config.TargetAdapterId.Value)
+            : TargetOptions.Count == 1 ? TargetOptions[0] : null;
     }
 
     public async Task RefreshServiceStatusAsync()
@@ -225,9 +360,23 @@ public sealed partial class SettingsViewModel : ViewModelBase, ViewModelBase.IIn
         return Task.CompletedTask;
     }
 
+    private async Task ApplyLanguageAsync()
+    {
+        if (IsBusy || SelectedLanguage == null)
+            return;
+        try
+        {
+            LanguagePreferences.SaveAndRestart(SelectedLanguage.Value);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "LanguageChangeFailed");
+            await _dialogService.ShowErrorAsync(AppStrings.Get("Text_LanguageChangeFailed"));
+        }
+    }
+
     private Task CopySsidAsync() => CopyToClipboardAsync(Ssid);
 
-    private Task CopyPasswordAsync() => CopyToClipboardAsync(Passphrase);
 
     private static Task CopyToClipboardAsync(string text)
     {
@@ -239,58 +388,36 @@ public sealed partial class SettingsViewModel : ViewModelBase, ViewModelBase.IIn
 
     private async Task SaveAsync()
     {
-        if (IsBusy)
-            return;
-
-        if (Passphrase.Length < 8)
-        {
-            await _dialogService.ShowErrorAsync(AppStrings.Get("Text_PassphraseInvalidError"));
-            return;
-        }
-
-        if (MaxClientCount < 1 || MaxClientCount > 32)
-        {
-            await _dialogService.ShowErrorAsync(AppStrings.Get("Text_MaxClientCountInvalidError"));
-            return;
-        }
-
+        if (IsBusy || !_manualSession.OwnsSession) return;
+        if (!await ConfirmManualChannelAsync()) return;
         IsBusy = true;
         SetGlobalProcessing(true);
         try
         {
-            var config =
-                await ConfigManager.SaveConfigAsync(BuildConfig())
-                ?? throw new InvalidOperationException("Config save failed");
-
+            // Validar e persistir antes de interromper a conexão que está funcionando.
+            // Reutilizar o supervisor mantém os limites de tempo e a limpeza do DNS.
+            if (string.IsNullOrWhiteSpace(Ssid) || Passphrase.Length < 8)
+                throw new InvalidOperationException(AppStrings.Get("Text_PassphraseInvalidError"));
+            if (MaxClientCount < 1 || MaxClientCount > 32)
+                throw new InvalidOperationException(AppStrings.Get("Text_MaxClientCountInvalidError"));
+            var config = await ConfigManager.SaveConfigAsync(BuildConfig())
+                ?? throw new InvalidOperationException(AppStrings.Get("Text_SettingsSaveFailed"));
             AsyncFileLogger.CurrentLogLevel = config.LogLevel;
-
-            await ApplyServiceStateChangeAsync(config);
-
-            _serviceStateManager.SetAutostart(
-                EnableService,
-                ProcessExecutablePathProvider.GetExecutablePath()
-            );
-
-            if (EnableService)
-            {
-                await _serviceClient.WaitForHotspotActiveAsync();
-            }
-
-            var serviceStatus = await _serviceManager.GetServiceStatusAsync(AppConstants.AppName);
-            if (serviceStatus != ServiceStatus.Running && EnableService)
-            {
-                _logger.LogInformation("ServiceStarting");
-            }
+            TestStatus = AppStrings.Get("Text_ApplyingHotspotSettings");
+            await _manualSession.StopAsync();
+            _dnsStatus = null;
+            // Se a parada falhar, não tentar iniciar uma segunda sessão.
+            await _manualSession.StartAsync(config);
+            TestStatus = await _manualSession.ReadStatusAsync();
+            if (!config.UseCustomDns) await CheckDnsAndOfferRepairAsync();
+            TestStatus += "\n" + AppStrings.Get("Text_HotspotSettingsApplied");
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "SettingsSaveFailed");
-            UiExceptionService.HandleUnhandledException(
-                ex,
-                "SettingsSave",
-                AppStrings.Get("Text_SettingsSaveFailed"),
-                AppStrings.Get("Text_ErrorDialogTitle")
-            );
+            ManualTestDiagnostics.Write("Falha ao salvar e aplicar o hotspot", ex);
+            TestStatus = AppStrings.Get("Text_SettingsSaveFailed");
+            await _dialogService.ShowErrorAsync(AppStrings.Get("Text_SettingsSaveFailed"));
         }
         finally
         {
@@ -334,6 +461,11 @@ public sealed partial class SettingsViewModel : ViewModelBase, ViewModelBase.IIn
 
     private async Task ResetAsync()
     {
+        if (_manualSession.OwnsSession)
+        {
+            await _dialogService.ShowErrorAsync(AppStrings.Get("Text_StopTestFirst"));
+            return;
+        }
         var result = await _dialogService.ShowResetConfirmationAsync();
 
         if (result)
@@ -369,7 +501,7 @@ public sealed partial class SettingsViewModel : ViewModelBase, ViewModelBase.IIn
     {
         try
         {
-            var folder = ConfigManager.ConfigFolderPath;
+            var folder = LogPaths.DirectoryPath;
             if (Directory.Exists(folder))
             {
                 _fileExplorerService.OpenFolder(folder);
@@ -387,6 +519,14 @@ public sealed partial class SettingsViewModel : ViewModelBase, ViewModelBase.IIn
             Passphrase = Passphrase,
             DisableAutoConfig = DisableAutoConfig,
             ForceLanFallback = ForceLanFallback,
+            ApplySystemOptimizations = ApplySystemOptimizations,
+            UpstreamAdapterId = SelectedUpstream?.Value,
+            TargetAdapterId = SelectedTarget?.Value,
+            Channel = SelectedChannel?.Value ?? 0,
+            UseCustomDns = UseCustomDns,
+            UseManualDns = SelectedDnsMode?.Value == true,
+            PreferredDns = PreferredDns.Trim(),
+            AlternateDns = AlternateDns.Trim(),
         };
 
         if (SelectedAuthentication?.Value is { } auth)
@@ -414,6 +554,128 @@ public sealed partial class SettingsViewModel : ViewModelBase, ViewModelBase.IIn
             config.LogLevel = logLevel;
         }
 
+        if (config.Channel != 0 && (!ChannelRecoveryPolicy.IsSupportedChannel(config.Channel) || config.Band != (ChannelRecoveryPolicy.DriverBand(config.Channel) == 1 ? TetheringWiFiBand.FiveGigahertz : TetheringWiFiBand.TwoPointFourGigahertz)))
+            throw new InvalidOperationException(AppStrings.Get("Text_ChannelBandRequired"));
+        if (config.Channel != 0 && EnableService)
+            throw new InvalidOperationException(AppStrings.Get("Text_ChannelServiceUnsupported"));
+        if (config.UseCustomDns && EnableService)
+            throw new InvalidOperationException(AppStrings.Get("Text_CustomDnsServiceUnsupported"));
+        if (config.UseCustomDns && config.UseManualDns)
+        {
+            try { ManualDnsSettings.Parse(config.PreferredDns, config.AlternateDns); }
+            catch (ArgumentException) { throw new InvalidOperationException(AppStrings.Get("Text_ManualDnsInvalid")); }
+        }
         return config;
+    }
+
+    private async Task StartTestAsync()
+    {
+        if (IsBusy) return;
+        // Restored manual preferences and keyboard changes must also show the notice.
+        if (!await ConfirmManualChannelAsync()) return;
+        _hotspotAction = "Text_StartingHotspotButton";
+        IsBusy = true;
+        _dnsStatus = null;
+        SetGlobalProcessing(true);
+        try
+        {
+            if (await Task.Run(() => _serviceManager.IsServiceInstalledAsync(AppConstants.AppName)).WaitAsync(TimeSpan.FromSeconds(5)))
+                throw new InvalidOperationException(AppStrings.Get("Text_TestServiceConflict"));
+            if (string.IsNullOrWhiteSpace(Ssid) || Passphrase.Length < 8)
+                throw new InvalidOperationException(AppStrings.Get("Text_PassphraseInvalidError"));
+            // O teste usa os campos da tela, sem salvar credenciais ou ativar o serviço.
+            var configuration = BuildConfig();
+            await _manualSession.StartAsync(configuration);
+            TestStatus = await _manualSession.ReadStatusAsync();
+            // A sondagem local da porta 53 mede o ICS, não o filtro dos clientes.
+            if (!configuration.UseCustomDns) await CheckDnsAndOfferRepairAsync();
+        }
+        catch (Exception ex) { ManualTestDiagnostics.Write("Falha no comando de teste", ex); TestStatus = AppStrings.Format("Text_TestFailed", ex.Message); }
+        finally { _hotspotAction = null; IsBusy = false; SetGlobalProcessing(false); }
+    }
+
+    private async Task CheckDnsAndOfferRepairAsync()
+    {
+        TestStatus += "\n" + AppStrings.Get("Text_HotspotDnsChecking");
+        var health = await HotspotDnsHealth.CheckAsync();
+        _dnsStatus = HotspotDnsHealth.Describe(health);
+        TestStatus = await _manualSession.ReadStatusAsync() + "\n" + _dnsStatus;
+        // Never infer consent from DNS failure: recovery interrupts WSL/containers.
+        if (health != false || !await _dialogService.ShowWslDnsRepairConfirmationAsync(true)) return;
+        try
+        {
+            await _dnsRepair.RepairAsync();
+            health = await HotspotDnsHealth.CheckAsync();
+            _dnsStatus = HotspotDnsHealth.Describe(health);
+            // Adoption reads the actual virtual interface channel; restarting again
+            // to enforce the old selection could immediately reproduce the DNS fault.
+            TestStatus = await _manualSession.ReadStatusAsync() + "\n" + _dnsStatus
+                + "\n" + AppStrings.Get("Text_HotspotRecoveredChannel");
+        }
+        catch (Exception ex)
+        {
+            ManualTestDiagnostics.Write("Falha na recuperação oferecida após início", ex);
+            TestStatus = AppStrings.Format("Text_TestFailed", ex.Message);
+        }
+    }
+
+    private async Task RefreshAdaptersAsync()
+    {
+        var upstreamId = SelectedUpstream?.Value;
+        var targetId = SelectedTarget?.Value;
+        try
+        {
+            var upstream = AdapterSelection.List(false);
+            var targets = await AdapterSelection.ListTargetsAsync();
+            UpstreamOptions.Clear();
+            foreach (var option in upstream) UpstreamOptions.Add(option);
+            TargetOptions.Clear();
+            foreach (var option in targets) TargetOptions.Add(option);
+            // Atualizar os indicadores sem trocar silenciosamente a escolha do usuário.
+            SelectedUpstream = upstreamId.HasValue
+                ? UpstreamOptions.FirstOrDefault(o => o.Value == upstreamId)
+                : UpstreamOptions.FirstOrDefault();
+            SelectedTarget = targetId.HasValue
+                ? TargetOptions.FirstOrDefault(o => o.Value == targetId)
+                : TargetOptions.Count == 1 ? TargetOptions[0] : null;
+        }
+        catch (Exception ex)
+        {
+            TestStatus = AppStrings.Format("Text_TestFailed", ex.Message);
+        }
+    }
+
+    private async Task RefreshTestAsync()
+    {
+        if (IsBusy) return;
+        IsBusy = true;
+        try { TestStatus = await _manualSession.ReadStatusAsync();
+            if (_manualSession.OwnsSession && _dnsStatus != null) TestStatus += "\n" + _dnsStatus; }
+        catch (Exception ex) { ManualTestDiagnostics.Write("Falha no comando de teste", ex); TestStatus = AppStrings.Format("Text_TestFailed", ex.Message); }
+        finally { _hotspotAction = null; IsBusy = false; }
+    }
+
+    public async Task RefreshSessionStateAsync()
+    {
+        await RefreshTestAsync();
+        OnPropertyChanged(nameof(CanStopHotspot));
+            OnPropertyChanged(nameof(ApplyHotspotVisibility));
+        OnPropertyChanged(nameof(HotspotButtonLabel));
+        OnPropertyChanged(nameof(HotspotButtonBackground));
+    }
+
+    private async Task StopTestAsync()
+    {
+        if (IsBusy) return;
+        _hotspotAction = "Text_StoppingHotspotButton";
+        IsBusy = true;
+        try
+        {
+            await _manualSession.StopAsync();
+            _dnsStatus = null;
+            TestStatus = AppStrings.Get("Text_TestIdle");
+        }
+        catch (Exception ex) { ManualTestDiagnostics.Write("Falha no comando de teste", ex); TestStatus = AppStrings.Format("Text_TestFailed", ex.Message); }
+        finally { _hotspotAction = null; IsBusy = false; }
     }
 }

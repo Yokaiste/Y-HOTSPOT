@@ -129,8 +129,16 @@ public static class ConfigManager
             normalized.LogLevel = config.LogLevel;
         }
 
+        normalized.Channel = HotspotApp.Services.Infrastructure.ChannelRecoveryPolicy.IsSupportedChannel(config.Channel) ? config.Channel : 0;
+        normalized.UseCustomDns = config.UseCustomDns;
+        normalized.UseManualDns = config.UseManualDns;
+        normalized.PreferredDns = (config.PreferredDns ?? "").Trim();
+        normalized.AlternateDns = (config.AlternateDns ?? "").Trim();
         normalized.DisableAutoConfig = config.DisableAutoConfig;
         normalized.ForceLanFallback = config.ForceLanFallback;
+        normalized.ApplySystemOptimizations = config.ApplySystemOptimizations;
+        normalized.UpstreamAdapterId = config.UpstreamAdapterId;
+        normalized.TargetAdapterId = config.TargetAdapterId;
         if (Enum.IsDefined(config.DisconnectMode))
         {
             normalized.DisconnectMode = config.DisconnectMode;

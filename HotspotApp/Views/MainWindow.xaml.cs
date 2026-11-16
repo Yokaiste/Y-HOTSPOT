@@ -56,6 +56,8 @@ public sealed partial class MainWindow : Window
 
         _windowCustomizer = new WindowCustomizer(this, _appWindow);
         _windowCustomizer.InitializeWindowStyle();
+        Microsoft.UI.Input.InputNonClientPointerSource.GetForWindowId(_appWindow.Id)
+            .ExitedMoveSize += (_, _) => _windowCustomizer.RememberPosition();
 
         var windowIconPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "icon.ico");
         if (File.Exists(windowIconPath))
@@ -93,6 +95,7 @@ public sealed partial class MainWindow : Window
         if (e.Msg == WindowInterop.WmDpiChanged || e.Msg == WindowInterop.WmDisplayChange)
         {
             QueuePositionUpdate();
+            _ = DispatcherQueue.TryEnqueue(UpdateTitleDragRegion);
         }
     }
 
@@ -132,12 +135,16 @@ public sealed partial class MainWindow : Window
 
     public void NavView_Loaded(object sender, RoutedEventArgs e)
     {
-        NavView.SelectedItem = NavigationItems[0];
+        NavView.SelectedItem = App.StartInSettings
+            ? NavigationItems.First(item => item.PageType == typeof(SettingsPage))
+            : NavigationItems[0];
+        App.StartInSettings = false;
         _ = EnsureServiceVersionMatchAsync();
     }
 
     private void RootGrid_Loaded(object sender, RoutedEventArgs e)
     {
+        UpdateTitleDragRegion();
         if (RootGrid.XamlRoot != null)
         {
             _dialogService.SetXamlRoot(RootGrid.XamlRoot);
@@ -228,7 +235,35 @@ public sealed partial class MainWindow : Window
         }
     }
 
-    public void HideToTrayItem_Tapped(object sender, TappedRoutedEventArgs e)
+    public void PinWindow_Click(object sender, RoutedEventArgs e)
+    {
+        try { _windowCustomizer.SetPinned(PinWindowButton.IsChecked == true); }
+        catch (Exception ex)
+        {
+            PinWindowButton.IsChecked = _windowCustomizer.IsPinned;
+            UiExceptionService.LogUnhandledException(ex, "SetWindowPinnedFailed");
+        }
+    }
+
+    public void RestorePosition_Click(object sender, RoutedEventArgs e)
+        => _windowCustomizer.RestorePosition();
+
+    public void TitleDragRegion_SizeChanged(object sender, SizeChangedEventArgs e)
+        => UpdateTitleDragRegion();
+
+    private void UpdateTitleDragRegion()
+    {
+        if (_appWindow == null || TitleDragRegion.XamlRoot == null) return;
+        var scale = TitleDragRegion.XamlRoot.RasterizationScale;
+        var origin = TitleDragRegion.TransformToVisual(RootGrid).TransformPoint(new Windows.Foundation.Point());
+        // Register only the title area; pin, restore and close remain ordinary buttons.
+        var input = Microsoft.UI.Input.InputNonClientPointerSource.GetForWindowId(_appWindow.Id);
+        input.SetRegionRects(Microsoft.UI.Input.NonClientRegionKind.Caption,
+            [new Windows.Graphics.RectInt32((int)(origin.X * scale), (int)(origin.Y * scale),
+                (int)(TitleDragRegion.ActualWidth * scale), (int)(TitleDragRegion.ActualHeight * scale))]);
+    }
+
+    public void CloseToTray_Click(object sender, RoutedEventArgs e)
     {
         _ = HideToTrayAsync();
     }

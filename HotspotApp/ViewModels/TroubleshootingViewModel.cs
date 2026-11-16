@@ -11,6 +11,7 @@ namespace HotspotApp.ViewModels;
 public sealed partial class TroubleshootingViewModel(
     HotspotOptimizer optimizer,
     ServiceStateManager serviceStateManager,
+    WslDnsRepairService wslDnsRepair,
     DialogService dialogService,
     ILogger<TroubleshootingViewModel> logger
 ) : ViewModelBase, ViewModelBase.IInitializable
@@ -24,6 +25,7 @@ public sealed partial class TroubleshootingViewModel(
             return Task.CompletedTask;
         }
 
+        Items.Add(CreateItem("Text_WslDnsTitle", "Text_WslDnsDescription", RepairWslDnsAsync));
         Items.Add(
             CreateItem(
                 "Text_TroubleshootingRemoveServiceTitle",
@@ -87,6 +89,15 @@ public sealed partial class TroubleshootingViewModel(
     private async Task RemoveServiceAsync()
     {
         await serviceStateManager.ApplyAsync(false);
+    }
+
+    private async Task RepairWslDnsAsync()
+    {
+        if (!await dialogService.ShowWslDnsRepairConfirmationAsync()) return;
+        await wslDnsRepair.RepairAsync();
+        var health = await HotspotDnsHealth.CheckAsync();
+        await dialogService.ShowWslDnsRepairResultAsync(wslDnsRepair.DirectoryPath,
+            HotspotDnsHealth.Describe(health));
     }
 
     private Task RemoveAutostartAsync()

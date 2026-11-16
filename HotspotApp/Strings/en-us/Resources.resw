@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <root>
   <resheader name="resmimetype">
     <value>text/microsoft-resx</value>
@@ -12,8 +12,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-
-  <!-- Navigation -->
   <data name="Text_NavStatusLabel" xml:space="preserve">
     <value>Status</value>
   </data>
@@ -26,8 +24,6 @@
   <data name="Text_NavTroubleshootingLabel" xml:space="preserve">
     <value>Troubleshooting</value>
   </data>
-
-  <!-- Status Page -->
   <data name="StatusPage_Header.Title" xml:space="preserve">
     <value>Status</value>
   </data>
@@ -55,8 +51,6 @@
   <data name="StatusPage_MacAddressHeader.Text" xml:space="preserve">
     <value>MAC Address</value>
   </data>
-
-  <!-- Diagnostics Page -->
   <data name="DiagnosticsPage_Header.Title" xml:space="preserve">
     <value>Diagnostics</value>
   </data>
@@ -87,8 +81,6 @@
   <data name="Text_DiagnosticsStatusRefreshExceptionFormat" xml:space="preserve">
     <value>Error refreshing status: {0}</value>
   </data>
-
-  <!-- Settings Page -->
   <data name="SettingsPage_Header.Title" xml:space="preserve">
     <value>Settings</value>
   </data>
@@ -113,10 +105,7 @@
   <data name="SettingsPage_PasswordGenerate.Content" xml:space="preserve">
     <value>Generate</value>
   </data>
-  <data name="SettingsPage_CopyPassword.Content" xml:space="preserve">
-    <value>Copy Password</value>
-  </data>
-  <data name="SettingsPage_BandHeader.Header" xml:space="preserve">
+<data name="SettingsPage_BandHeader.Header" xml:space="preserve">
     <value>Band</value>
   </data>
   <data name="SettingsPage_LockBand.Content" xml:space="preserve">
@@ -173,8 +162,6 @@
   <data name="Text_PasswordLabel" xml:space="preserve">
     <value>Password</value>
   </data>
-
-  <!-- Troubleshooting Page -->
   <data name="TroubleshootingPage_Header.Title" xml:space="preserve">
     <value>Troubleshooting</value>
   </data>
@@ -229,8 +216,6 @@
   <data name="Text_TroubleshootingRemoveAutostartDescription" xml:space="preserve">
     <value>Removes the app from the startup list.</value>
   </data>
-
-  <!-- Dialogs -->
   <data name="Text_ErrorDialogTitle" xml:space="preserve">
     <value>Error</value>
   </data>
@@ -282,8 +267,6 @@
   <data name="Text_QrDialogCopiedButton" xml:space="preserve">
     <value>Copied</value>
   </data>
-
-  <!-- Service & Status Messages -->
   <data name="Text_StatusUnknown" xml:space="preserve">
     <value>Unknown</value>
   </data>
@@ -347,8 +330,6 @@
   <data name="Text_MaxClientCountInvalidError" xml:space="preserve">
     <value>Device limit must be between 1 and 32.</value>
   </data>
-
-  <!-- Tray Icon -->
   <data name="MainWindow_HideToTray.Content" xml:space="preserve">
     <value>Minimize to Tray</value>
   </data>
@@ -374,10 +355,9 @@
     <value>Exit</value>
   </data>
   <data name="Text_TrayTooltipFormat" xml:space="preserve">
-    <value>{0}&#xA;Status: {1}</value>
+    <value>{0}
+Status: {1}</value>
   </data>
-
-  <!-- Enumerations & Options -->
   <data name="Text_BandAuto" xml:space="preserve">
     <value>Auto</value>
   </data>
@@ -417,8 +397,6 @@
   <data name="Text_LogDetailAll" xml:space="preserve">
     <value>All</value>
   </data>
-
-  <!-- About -->
   <data name="MainWindow_About.Content" xml:space="preserve">
     <value>About</value>
   </data>
@@ -434,8 +412,6 @@
   <data name="Text_AboutReleasesButton" xml:space="preserve">
     <value>Releases</value>
   </data>
-
-  <!-- Config Load Error -->
   <data name="Text_ConfigLoadErrorTitle" xml:space="preserve">
     <value>Config Load Error</value>
   </data>
@@ -448,4 +424,181 @@
   <data name="Text_ConfigLoadErrorContinueButton" xml:space="preserve">
     <value>Reset &amp; Continue</value>
   </data>
+  <data name="SettingsPage_Language.Header" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="SettingsPage_LanguageDescription.Text" xml:space="preserve">
+    <value>Applying the language reopens the app without restarting the hotspot. Save any other pending changes first.</value>
+  </data>
+  <data name="SettingsPage_ApplyLanguage.Content" xml:space="preserve">
+    <value>Apply language</value>
+  </data>
+  <data name="MainWindow_CloseToTray.[using:Microsoft.UI.Xaml.Automation]AutomationProperties.Name" xml:space="preserve">
+    <value>Close to system tray</value>
+  </data>
+  <data name="MainWindow_CloseToTray.[using:Microsoft.UI.Xaml.Controls]ToolTipService.ToolTip" xml:space="preserve">
+    <value>Close to system tray — the app keeps running</value>
+  </data>
+  <data name="Text_LanguageChangeFailed" xml:space="preserve">
+    <value>Unable to change the language. Please try again.</value>
+  </data>
+  <data name="SettingsPage_Upstream.Header" xml:space="preserve">
+    <value>Internet source (Ethernet)</value>
+  </data>
+  <data name="SettingsPage_Target.Header" xml:space="preserve">
+    <value>Hotspot output</value>
+  </data>
+  <data name="SettingsPage_ManualTestDescription.Text" xml:space="preserve">
+    <value>Start the hotspot with the settings below. It stays active while the app is open, including in the system tray. Stopping restores the previous settings.</value>
+  </data>
+  <data name="SettingsPage_StartTest.Content" xml:space="preserve">
+    <value>Start hotspot</value>
+  </data>
+  <data name="SettingsPage_StopTest.Content" xml:space="preserve">
+    <value>Stop hotspot</value>
+  </data>
+  <data name="SettingsPage_Optimizations.Content" xml:space="preserve">
+    <value>Apply system optimizations (advanced)</value>
+  </data>
+  <data name="SettingsPage_OptimizationsDescription.Text" xml:space="preserve">
+    <value>Allows registry, service and global TCP changes in service mode. Disabled by default; does not apply to hotspots started from this panel.</value>
+  </data>
+  <data name="Text_AdapterUnavailable" xml:space="preserve">
+    <value>The selected adapter is unavailable. Choose an available adapter.</value>
+  </data>
+  <data name="Text_SelectAdapters" xml:space="preserve">
+    <value>Select both the Ethernet source and the Wi-Fi adapter.</value>
+  </data>
+  <data name="Text_TestAlreadyActive" xml:space="preserve">
+    <value>A hotspot is already active or changing state. Stop it before starting another.</value>
+  </data>
+  <data name="Text_BandUnsupported" xml:space="preserve">
+    <value>The requested band is not supported.</value>
+  </data>
+  <data name="Text_TestIdle" xml:space="preserve">
+    <value>Hotspot off.</value>
+  </data>
+  <data name="Text_TestActive" xml:space="preserve">
+    <value>Hotspot on. Channel not yet available; click Read channel to refresh.</value>
+  </data>
+  <data name="Text_TestFailed" xml:space="preserve">
+    <value>Could not complete the operation: {0}</value>
+  </data>
+  <data name="Text_TestServiceConflict" xml:space="preserve">
+    <value>Disable the Y-HOTSPOT service before starting the hotspot from this panel.</value>
+  </data>
+  <data name="Text_StopTestFirst" xml:space="preserve">
+    <value>Stop the hotspot before this action.</value>
+  </data>
+  <data name="SettingsPage_RefreshTest.Content" xml:space="preserve"><value>Read channel</value></data>
+  <data name="Text_TestChannel" xml:space="preserve"><value>Hotspot on. Channel reported by Windows: {0} (read at {1}).</value></data>
+  <data name="Text_AdapterInternet" xml:space="preserve"><value>Internet</value></data>
+  <data name="Text_AdapterLocal" xml:space="preserve"><value>Connected; internet unconfirmed</value></data>
+  <data name="Text_AdapterDisconnected" xml:space="preserve"><value>Disconnected</value></data>
+  <data name="Text_AdapterVirtual" xml:space="preserve"><value>Virtual</value></data>
+  <data name="Text_AdapterWifi" xml:space="preserve"><value>Wi-Fi</value></data>
+  <data name="Text_AdapterCable" xml:space="preserve"><value>Wired</value></data>
+  <data name="Text_AdapterOther" xml:space="preserve"><value>Adapter</value></data>
+  <data name="SettingsPage_RefreshAdapters.Content" xml:space="preserve"><value>Refresh connections</value></data>
+  <data name="SettingsPage_AdapterLegend.Text" xml:space="preserve"><value>🌐 Internet reported by Windows
+❓ Connected without confirmed internet
+❌ Disconnected</value></data>
+  <data name="Text_AdapterBluetooth" xml:space="preserve"><value>Bluetooth</value></data>
+  <data name="Text_AdapterPpp" xml:space="preserve"><value>PPP / VPN</value></data>
+  <data name="Text_AdapterTunnel" xml:space="preserve"><value>Tunnel</value></data>
+  <data name="Text_TestTimeout" xml:space="preserve"><value>Windows did not complete the operation within 15 seconds. Hotspot stop has not been confirmed.</value></data>
+  <data name="SettingsDesign_Title.Text" xml:space="preserve"><value>Your hotspot</value></data>
+  <data name="SettingsDesign_Subtitle.Text" xml:space="preserve"><value>Connections and network in one place.</value></data>
+  <data name="SettingsDesign_Control.Text" xml:space="preserve"><value>Hotspot control</value></data>
+  <data name="SettingsDesign_ControlDescription.Text" xml:space="preserve"><value>Start your network and check its operating channel.</value></data>
+  <data name="SettingsDesign_Connections.Text" xml:space="preserve"><value>Connections</value></data>
+  <data name="SettingsDesign_ConnectionsDescription.Text" xml:space="preserve"><value>Choose where internet comes from and where to share it.</value></data>
+  <data name="SettingsDesign_Legend.Text" xml:space="preserve"><value>Connection status</value></data>
+  <data name="SettingsDesign_Network.Text" xml:space="preserve"><value>Wi-Fi network</value></data>
+  <data name="SettingsDesign_NetworkDescription.Text" xml:space="preserve"><value>Choose how your network appears on your devices.</value></data>
+  <data name="SettingsDesign_Preferences.Text" xml:space="preserve"><value>Preferences</value></data>
+  <data name="SettingsDesign_PreferencesDescription.Text" xml:space="preserve"><value>App language.</value></data>
+  <data name="SettingsDesign_Advanced.Text" xml:space="preserve"><value>Advanced options</value></data>
+  <data name="SettingsDesign_AdvancedDescription.Text" xml:space="preserve"><value>Background service, diagnostics and maintenance.</value></data>
+  <data name="SettingsDesign_SaveHint.Text" xml:space="preserve"><value>Save and apply restarts the active hotspot with these settings.</value></data>
+  <data name="MainWindow_Pin.ToolTipService.ToolTip" xml:space="preserve"><value>Keep on top</value></data>
+  <data name="MainWindow_Pin.AutomationProperties.Name" xml:space="preserve"><value>Keep on top</value></data>
+  <data name="MainWindow_RestorePosition.ToolTipService.ToolTip" xml:space="preserve"><value>Restore default size and position</value></data>
+  <data name="MainWindow_RestorePosition.AutomationProperties.Name" xml:space="preserve"><value>Restore default size and position</value></data>
+  <data name="Text_AboutOriginalAuthor" xml:space="preserve"><value>Original project</value></data>
+  <data name="Text_AboutForkAuthor" xml:space="preserve"><value>Fork development and improvements</value></data>
+  <data name="Text_ChannelAuto" xml:space="preserve"><value>Automatic</value></data>
+<data name="Text_ChannelBandRequired" xml:space="preserve"><value>Select a fixed band matching the requested channel.</value></data>
+  <data name="Text_ChannelServiceUnsupported" xml:space="preserve"><value>Manual channel selection is available only with the background service disabled.</value></data>
+  <data name="SettingsPage_Channel.Header" xml:space="preserve"><value>Hotspot channel</value></data>
+  <data name="SettingsPage_ChannelDescription.Text" xml:space="preserve"><value>Private Intel driver controls; verified: AX200 24.0.2.1, channel 6. Other hardware/channels may be tried after a warning. Restarts Wi-Fi; use Ethernet. Availability depends on the driver and local regulations.</value></data>
+  <data name="Text_ChannelPending" xml:space="preserve"><value>A previous channel recovery is pending. Review channel-recovery.json beside the executable before starting.</value></data>
+  <data name="Text_ChannelUnsupported" xml:space="preserve"><value>The requested channel or adapter cannot be accessed. Use Automatic or review the log.</value></data>
+  <data name="Text_ChannelConflict" xml:space="preserve"><value>The driver settings changed or have an unexpected format. Automatic recovery stopped; the snapshot was preserved.</value></data>
+  <data name="Text_ChannelDisconnect" xml:space="preserve"><value>Disconnect this Wi-Fi adapter from other networks before selecting a channel. Use Ethernet for internet.</value></data>
+  <data name="Text_ChannelRestartFailed" xml:space="preserve"><value>Wi-Fi restart could not be confirmed. The recovery snapshot was preserved.</value></data>
+  <data name="Text_ChannelNotConfirmed" xml:space="preserve"><value>Windows did not confirm the selected channel. The hotspot will be stopped and its previous settings restored.</value></data>
+  <data name="Text_StopNotConfirmed" xml:space="preserve"><value>Windows has not confirmed that the hotspot is off; recovery data was preserved.</value></data>
+  <data name="Text_RecoveryMessage00" xml:space="preserve"><value>The supervisor exited without confirming recovery. Check ui.log and the recovery file.</value></data>
+  <data name="Text_RecoveryMessage01" xml:space="preserve"><value>The supervisor exited; check the recovery logs.</value></data>
+  <data name="Text_RecoveryMessage02" xml:space="preserve"><value>Could not start the supervisor.</value></data>
+  <data name="Text_RecoveryMessage03" xml:space="preserve"><value>Supervisor unavailable or previous recovery pending; check ui.log.</value></data>
+  <data name="Text_RecoveryMessage04" xml:space="preserve"><value>The pipe peer does not match the supervisor process.</value></data>
+  <data name="Text_RecoveryMessage05" xml:space="preserve"><value>The supervisor did not confirm initialization.</value></data>
+  <data name="Text_RecoveryMessage06" xml:space="preserve"><value>The source adapter could not be found to preserve DNS settings.</value></data>
+  <data name="Text_RecoveryMessage07" xml:space="preserve"><value>Recovery is pending in dns-recovery.json. Review it before starting another session.</value></data>
+  <data name="Text_RecoveryMessage08" xml:space="preserve"><value>Source DNS changed during startup. The hotspot will be stopped and recovery assessed.</value></data>
+  <data name="Text_RecoveryMessage09" xml:space="preserve"><value>DNS changed to an unfamiliar value; automatic restoration was blocked. The snapshot was preserved.</value></data>
+  <data name="Text_RecoveryMessage10" xml:space="preserve"><value>The DNS snapshot does not contain a valid IPv4 list.</value></data>
+  <data name="Text_RecoveryMessage11" xml:space="preserve"><value>Could not start DNS recovery.</value></data>
+  <data name="Text_RecoveryMessage12" xml:space="preserve"><value>DNS restoration failed; code </value></data>
+  <data name="Text_RecoveryMessage13" xml:space="preserve"><value>DNS restoration was not confirmed; the snapshot was preserved.</value></data>
+  <data name="Text_RecoveryMessage14" xml:space="preserve"><value>The operation timed out. The interface remains responsive; cleanup is pending until Windows responds.</value></data>
+  <data name="Text_RecoveryMessage15" xml:space="preserve"><value>Invalid supervisor command.</value></data>
+  <data name="Text_RecoveryMessage16" xml:space="preserve"><value>The operation failed. The supervisor is attempting to stop and recover the session; check ui.log.</value></data>
+  <data name="Text_RecoveryMessage17" xml:space="preserve"><value>Hotspot stopped and recovery completed.</value></data>
+  <data name="Text_RecoveryMessage18" xml:space="preserve"><value>Shutdown not confirmed; pending recovery was recorded.</value></data>
+  <data name="Text_RecoveryMessage19" xml:space="preserve"><value>The message exceeds the supervisor limit.</value></data>
+  <data name="Text_RecoveryMessage20" xml:space="preserve"><value>Invalid message length.</value></data>
+  <data name="Text_RecoveryMessage21" xml:space="preserve"><value>Empty message.</value></data>
+  <data name="SettingsPage_ShowPassword.Content" xml:space="preserve"><value>Show password</value></data>
+  <data name="Text_ShowPassword" xml:space="preserve"><value>Show password</value></data>
+  <data name="Text_HidePassword" xml:space="preserve"><value>Hide password</value></data>
+  <data name="Text_StartHotspotButton" xml:space="preserve"><value>Start hotspot</value></data>
+  <data name="Text_StopHotspotButton" xml:space="preserve"><value>Stop hotspot</value></data>
+  <data name="Text_StartingHotspotButton" xml:space="preserve"><value>Starting…</value></data>
+  <data name="Text_StoppingHotspotButton" xml:space="preserve"><value>Stopping…</value></data>
+  <data name="Text_WslDnsTitle" xml:space="preserve"><value>Repair hotspot DNS (WSL)</value></data>
+  <data name="Text_WslDnsDescription" xml:space="preserve"><value>Advanced recovery for a hotspot that connects but cannot resolve websites when WSL is installed. Recreates only the identified WSL virtual network, then restores WSL. Requires confirmation.</value></data>
+  <data name="Text_WslDnsConfirmation" xml:space="preserve"><value>This will interrupt the hotspot, WSL distributions, containers and sites hosted in WSL. Save your work first. The app will recreate the identified WSL network, start the hotspot, restart previously running distributions and update existing IPv4 port forwards that still point to the old WSL address. The IP may change; applications and other integrations may need manual attention. A recovery journal and logs will be saved beside the executable. This does not delete distributions or their files. Allow this recovery now?</value></data>
+  <data name="Text_WslDnsConfirmButton" xml:space="preserve"><value>Repair and restart WSL</value></data>
+  <data name="Text_WslDnsCompleted" xml:space="preserve"><value>Recovery completed and WSL restoration was verified. Reconnect your phone using DHCP and test a new website with mobile data off. Check your WSL applications too. This does not yet confirm client internet access. Logs: {0}</value></data>
+  <data name="Text_WslDnsFailed" xml:space="preserve"><value>Recovery or restoration was not completed. Check dns-recovery.log and dns-recovery-state.json in {0}. Running this action again resumes pending restoration before any new removal.</value></data>
+  <data name="Text_WslDnsTimeout" xml:space="preserve"><value>The worker is taking longer than expected and may still be restoring WSL. It was not terminated. Do not start another repair. Check the logs in {0}.</value></data>
+  <data name="Text_WslDnsBusy" xml:space="preserve"><value>A DNS recovery is already running.</value></data>
+  <data name="Text_HotspotDnsChecking" xml:space="preserve"><value>Checking hotspot DNS…</value></data>
+  <data name="Text_HotspotDnsHealthy" xml:space="preserve"><value>Hotspot DNS resolved the test name. Confirm browsing on your device.</value></data>
+  <data name="Text_HotspotDnsFailed" xml:space="preserve"><value>Hotspot is on, but its DNS did not resolve the test name. Browsing may fail.</value></data>
+  <data name="Text_HotspotDnsUnknown" xml:space="preserve"><value>Hotspot DNS could not be identified unambiguously. Connectivity is not verified.</value></data>
+  <data name="Text_HotspotRecoveredChannel" xml:space="preserve"><value>Recovery may change the channel. The status shows the observed channel when available; the selected channel is not guaranteed after recovery.</value></data>
+  <data name="SettingsPage_CustomDnsDescription.Text" xml:space="preserve"><value>Runs with the hotspot. Automatic uses DNS from the internet source; Manual uses the addresses you enter. Requires the separately installed Windows Packet Filter driver. Does not change Windows or Android DNS settings.</value></data>
+  <data name="Text_CustomDnsServiceUnsupported" xml:space="preserve"><value>Built-in DNS currently requires starting the hotspot from this application, with Windows service mode disabled.</value></data>
+  <data name="Text_CustomDnsBusy" xml:space="preserve"><value>Windows Packet Filter is already in use. Stop the other consumer before starting built-in DNS.</value></data>
+  <data name="Text_CustomDnsDriver" xml:space="preserve"><value>Windows Packet Filter is unavailable. Install the official signed driver before enabling built-in DNS.</value></data>
+  <data name="Text_CustomDnsNoUpstream" xml:space="preserve"><value>No usable IPv4 DNS server was found on the internet source.</value></data>
+  <data name="Text_CustomDnsPending" xml:space="preserve"><value>A previous DNS cleanup is pending. Check dns-backend-recovery.json beside the executable before starting again.</value></data>
+  <data name="SettingsPage_CustomDns.Content" xml:space="preserve"><value>Use built-in DNS (Windows Packet Filter)</value></data>
+  <data name="Text_CustomDnsInterface" xml:space="preserve"><value>The hotspot interface could not be identified unambiguously.</value></data>
+  <data name="Text_CustomDnsActive" xml:space="preserve"><value>Built-in DNS active · Windows Packet Filter</value></data>
+  <data name="Text_DnsModeAutomatic" xml:space="preserve"><value>Automatic</value></data>
+  <data name="Text_ManualDnsInvalid" xml:space="preserve"><value>Enter a valid preferred IPv4 DNS address and, optionally, an alternate address. Loopback, link-local, multicast and local PC addresses cannot be used.</value></data>
+  <data name="SettingsPage_DnsMode.Header" xml:space="preserve"><value>DNS servers</value></data>
+  <data name="Text_DnsModeManual" xml:space="preserve"><value>Manual</value></data>
+  <data name="SettingsPage_AlternateDns.Header" xml:space="preserve"><value>Alternate DNS (optional)</value></data>
+  <data name="SettingsPage_PreferredDns.Header" xml:space="preserve"><value>Preferred DNS (required)</value></data>
+  <data name="Text_ApplyingHotspotSettings" xml:space="preserve"><value>Saving and restarting the hotspot… Connected devices will disconnect briefly.</value></data>
+  <data name="Text_HotspotSettingsApplied" xml:space="preserve"><value>Settings saved and applied to the hotspot.</value></data>
+  <data name="Text_ChannelWarningTitle" xml:space="preserve"><value>Manual channel selection</value></data>
+  <data name="Text_ChannelWarningContent" xml:space="preserve"><value>Automatic is recommended. This method uses private Intel driver settings and restarts the selected Wi-Fi adapter. Channel 6 was verified on Intel AX200 driver 24.0.2.1. Other adapters, drivers and channels are unverified: they may ignore the request or fail to start. You may try anyway. The app checks the reported channel and attempts to restore previous settings on failure. A matching readback does not prove the driver honored the request if Automatic would choose the same channel.</value></data>
+  <data name="Text_ChannelWarningContinue" xml:space="preserve"><value>Try selected channel</value></data>
 </root>

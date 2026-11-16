@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net10.0-windows</TargetFramework><ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable><AllowUnsafeBlocks>true</AllowUnsafeBlocks><DisableRuntimeMarshalling>true</DisableRuntimeMarshalling></PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../HotspotApp/Services/Infrastructure/ManualDnsSettings.cs" Link="ManualDnsSettings.cs" />
+    <Compile Include="../../HotspotApp/Services/Infrastructure/NdisDnsPackets.cs" Link="NdisDnsPackets.cs" />
+    <Compile Include="../../HotspotApp/Services/Infrastructure/NdisDnsSession.cs" Link="NdisDnsSession.cs" />
+    <Compile Include="../../HotspotApp/Services/Infrastructure/DnsUpstreamResolver.cs" Link="DnsUpstreamResolver.cs" />
+    <None Include="../../HotspotApp/Import/ndisapi/ndisapi.dll" Link="ndisapi.dll" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

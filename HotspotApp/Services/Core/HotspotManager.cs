@@ -50,14 +50,19 @@ public sealed partial class HotspotManager : IDisposable
     {
         try
         {
+            if (config.UseCustomDns)
+                throw new InvalidOperationException(HotspotApp.Localization.AppStrings.Get("Text_CustomDnsServiceUnsupported"));
+            if (config.Channel != 0)
+                throw new InvalidOperationException(HotspotApp.Localization.AppStrings.Get("Text_ChannelServiceUnsupported"));
             LogStartingHotspot();
 
             // 1. Optimize system settings
-            await _optimizer.OptimizeSystemForHotspotAsync(config);
+            if (config.ApplySystemOptimizations)
+                await _optimizer.OptimizeSystemForHotspotAsync(config);
 
             // 2. Initialize Network (Wintun)
             _currentProfile = await _networkInitializer.InitializeAndGetProfileAsync(
-                config.ForceLanFallback
+                config.ForceLanFallback, config.UpstreamAdapterId
             );
             if (_currentProfile == null)
             {
@@ -66,7 +71,9 @@ public sealed partial class HotspotManager : IDisposable
             }
 
             // 3. Initialize Tethering Service
-            _tetheringService.Initialize(_currentProfile);
+            var target = config.TargetAdapterId.HasValue
+                ? await AdapterSelection.GetTargetAsync(config.TargetAdapterId.Value) : null;
+            _tetheringService.Initialize(_currentProfile, target);
 
             // 4. Configure Access Point
             await _tetheringService.ConfigureAsync(config);
@@ -84,7 +91,8 @@ public sealed partial class HotspotManager : IDisposable
             }
 
             // 6. Post-start configuration
-            await _tetheringService.DisableTimeoutAsync();
+            if (config.ApplySystemOptimizations)
+                await _tetheringService.DisableTimeoutAsync();
             await ApplyDisconnectPolicyAsync(config);
 
             LogHotspotStarted();

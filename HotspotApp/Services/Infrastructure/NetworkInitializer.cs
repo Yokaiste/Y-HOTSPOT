@@ -10,11 +10,15 @@ public sealed partial class NetworkInitializer(
 )
 {
     public async Task<ConnectionProfile?> InitializeAndGetProfileAsync(
-        bool forceLanFallback = false
+        bool forceLanFallback = false,
+        Guid? upstreamAdapterId = null
     )
     {
-        // Initialize Wintun Adapter
-        if (!await virtualAdapterService.InitializeAsync())
+        // O caminho Ethernet não precisa criar adaptador virtual nem alterar rotas.
+        if (!forceLanFallback && upstreamAdapterId.HasValue)
+            return AdapterSelection.GetUpstream(upstreamAdapterId.Value);
+
+        if (forceLanFallback && !await virtualAdapterService.InitializeAsync())
         {
             LogWintunInitFailed();
             return null;

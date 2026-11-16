@@ -29,9 +29,18 @@ public class HotspotConfig
     public TetheringWiFiBand Band { get; set; } = TetheringWiFiBand.Auto;
     public TetheringWiFiAuthenticationKind AuthenticationKind { get; set; } =
         TetheringWiFiAuthenticationKind.Wpa3;
+    // Zero delegates to Windows by default; manual candidates require a UI warning.
+    public int Channel { get; set; } = 0;
+    public bool UseCustomDns { get; set; } = false;
+    public bool UseManualDns { get; set; } = false;
+    public string PreferredDns { get; set; } = "";
+    public string AlternateDns { get; set; } = "";
     public int MaxClientCount { get; set; } = AppConstants.DefaultMaxClientCount;
     public bool DisableAutoConfig { get; set; } = false;
     public bool ForceLanFallback { get; set; } = false;
+    public bool ApplySystemOptimizations { get; set; } = false;
+    public Guid? UpstreamAdapterId { get; set; }
+    public Guid? TargetAdapterId { get; set; }
     public DisconnectWirelessMode DisconnectMode { get; set; } = DisconnectWirelessMode.None;
     public LogLevelSetting LogLevel { get; set; } = LogLevelSetting.All;
 

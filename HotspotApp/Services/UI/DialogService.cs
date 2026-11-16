@@ -38,6 +38,21 @@ public sealed class DialogService
         await dialog.ShowAsync();
     }
 
+    public async Task<bool> ShowManualChannelWarningAsync()
+    {
+        if (_xamlRoot == null) return false;
+        var dialog = new ContentDialog
+        {
+            XamlRoot = _xamlRoot,
+            Title = AppStrings.Get("Text_ChannelWarningTitle"),
+            Content = AppStrings.Get("Text_ChannelWarningContent"),
+            PrimaryButtonText = AppStrings.Get("Text_ChannelWarningContinue"),
+            CloseButtonText = AppStrings.Get("Text_ChannelAuto"),
+            DefaultButton = ContentDialogButton.Close,
+        };
+        return await dialog.ShowAsync() == ContentDialogResult.Primary;
+    }
+
     public async Task<bool> ShowResetConfirmationAsync()
     {
         if (_xamlRoot == null)
@@ -57,6 +72,37 @@ public sealed class DialogService
 
         var result = await dialog.ShowAsync();
         return result == ContentDialogResult.Primary;
+    }
+
+    public async Task<bool> ShowWslDnsRepairConfirmationAsync(bool dnsFailed = false)
+    {
+        if (_xamlRoot == null) return false;
+        ContentDialog dialog = new()
+        {
+            XamlRoot = _xamlRoot,
+            Title = AppStrings.Get("Text_WslDnsTitle"),
+            Content = (dnsFailed ? AppStrings.Get("Text_HotspotDnsFailed") + "\n\n" : "")
+                + AppStrings.Get("Text_WslDnsConfirmation") + "\n\n"
+                + AppStrings.Get("Text_HotspotRecoveredChannel"),
+            PrimaryButtonText = AppStrings.Get("Text_WslDnsConfirmButton"),
+            CloseButtonText = AppStrings.Get("Text_ResetDialogCancelButtonText"),
+            DefaultButton = ContentDialogButton.Close,
+        };
+        return await dialog.ShowAsync() == ContentDialogResult.Primary;
+    }
+
+    public async Task ShowWslDnsRepairResultAsync(string logDirectory, string? verification = null)
+    {
+        if (_xamlRoot == null) return;
+        ContentDialog dialog = new()
+        {
+            XamlRoot = _xamlRoot,
+            Title = AppStrings.Get("Text_WslDnsTitle"),
+            Content = AppStrings.Format("Text_WslDnsCompleted", logDirectory)
+                + (verification == null ? "" : "\n\n" + verification),
+            CloseButtonText = AppStrings.Get("Text_ErrorDialogCloseButtonText"),
+        };
+        await dialog.ShowAsync();
     }
 
     public async Task ShowHotspotQrAsync(string ssid, string passphrase)
@@ -163,38 +209,30 @@ public sealed class DialogService
             return;
         }
 
-        var stack = new StackPanel { Spacing = 8 };
-        stack.Children.Add(
-            new TextBlock
+        var stack = new StackPanel { Spacing = 16, MinWidth = 300 };
+        // The release belongs to the application; author credits remain separate.
+        var version = new Border
+        {
+            CornerRadius = new CornerRadius(18),
+            Padding = new Thickness(20, 12, 20, 12),
+            HorizontalAlignment = HorizontalAlignment.Center,
+            Background = (Brush)Application.Current.Resources["CardBackgroundFillColorDefaultBrush"],
+            BorderBrush = (Brush)Application.Current.Resources["CardStrokeColorDefaultBrush"],
+            BorderThickness = new Thickness(1),
+            Child = new TextBlock
             {
                 Text = AppStrings.Format("Text_AboutVersionFormat", AppConstants.Version),
-            }
-        );
-        stack.Children.Add(
-            new TextBlock
-            {
-                Text = AppStrings.Format("Text_AboutAuthorFormat", AppConstants.Author),
-            }
-        );
-
-        var linksStack = new StackPanel
-        {
-            Orientation = Orientation.Horizontal,
-            Spacing = 8,
-            Margin = new Thickness(0, 8, 0, 0),
+                FontSize = 24,
+                FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
+                Foreground = (Brush)Application.Current.Resources["TextFillColorPrimaryBrush"],
+            },
         };
-
-        var githubBtn = new Button { Content = AppStrings.Get("Text_AboutGithubButton") };
-        githubBtn.Click += async (s, e) =>
-            await Windows.System.Launcher.LaunchUriAsync(new Uri(AppConstants.GithubUrl));
-
-        var releasesBtn = new Button { Content = AppStrings.Get("Text_AboutReleasesButton") };
-        releasesBtn.Click += async (s, e) =>
-            await Windows.System.Launcher.LaunchUriAsync(new Uri(AppConstants.ReleasesUrl));
-
-        linksStack.Children.Add(githubBtn);
-        linksStack.Children.Add(releasesBtn);
-        stack.Children.Add(linksStack);
+        stack.Children.Add(version);
+        stack.Children.Add(CreateAuthorCard(AppConstants.Author, "Text_AboutOriginalAuthor",
+            (AppStrings.Get("Text_AboutGithubButton"), AppConstants.GithubUrl),
+            (AppStrings.Get("Text_AboutReleasesButton"), AppConstants.ReleasesUrl)));
+        stack.Children.Add(CreateAuthorCard("Thomas Vanini", "Text_AboutForkAuthor",
+            ("Linktree", "https://linktr.ee/ThomasVanini")));
 
         ContentDialog dialog = new()
         {
@@ -206,6 +244,38 @@ public sealed class DialogService
         };
 
         await dialog.ShowAsync();
+    }
+
+    private static Border CreateAuthorCard(string author, string roleKey,
+        params (string Label, string Url)[] links)
+    {
+        var content = new StackPanel { Spacing = 10 };
+        content.Children.Add(new TextBlock
+        {
+            Text = AppStrings.Format("Text_AboutAuthorFormat", author),
+            FontSize = 19,
+            FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
+            TextWrapping = TextWrapping.Wrap,
+        });
+        content.Children.Add(new TextBlock
+        {
+            Text = AppStrings.Get(roleKey),
+            Foreground = (Brush)Application.Current.Resources["TextFillColorSecondaryBrush"],
+            TextWrapping = TextWrapping.Wrap,
+        });
+        var buttons = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8 };
+        foreach (var (label, url) in links)
+            buttons.Children.Add(new HyperlinkButton { Content = label, NavigateUri = new Uri(url) });
+        content.Children.Add(buttons);
+        return new Border
+        {
+            CornerRadius = new CornerRadius(12),
+            Padding = new Thickness(18),
+            Background = (Brush)Application.Current.Resources["CardBackgroundFillColorDefaultBrush"],
+            BorderBrush = (Brush)Application.Current.Resources["CardStrokeColorDefaultBrush"],
+            BorderThickness = new Thickness(1),
+            Child = content,
+        };
     }
 
     public async Task<bool> ShowConfigLoadErrorAsync()

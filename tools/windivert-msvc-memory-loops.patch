@@ -1,0 +1,22 @@
+diff --git a/dll/windivert.c b/dll/windivert.c
+index f0ec577..45b0f30 100644
+--- a/dll/windivert.c
++++ b/dll/windivert.c
+@@ -91,6 +91,9 @@ static UINT32 WinDivertDivTen128(UINT32 *a);
+ 
+ #ifdef _MSC_VER
+ 
++/* Modern MSVC can recognize these CRT-free loops as calls to themselves.
++ * Keep only these fallback implementations unoptimized to prevent recursion. */
++#pragma optimize("", off)
+ #pragma intrinsic(memcpy)
+ #pragma function(memcpy)
+ void *memcpy(void *dst, const void *src, size_t n)
+@@ -111,6 +114,7 @@ void *memset(void *dst, int c, size_t n)
+     return dst;
+ }
+ 
++#pragma optimize("", on)
+ #define WINDIVERT_INLINE    __forceinline
+ 
+ #else       /* _MSC_VER */

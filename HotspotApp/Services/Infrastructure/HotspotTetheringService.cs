@@ -17,9 +17,11 @@ public sealed partial class HotspotTetheringService(ILogger<HotspotTetheringServ
     public bool IsActive =>
         _tetheringManager?.TetheringOperationalState == TetheringOperationalState.On;
 
-    public void Initialize(ConnectionProfile profile)
+    public void Initialize(ConnectionProfile profile, NetworkAdapter? target = null)
     {
-        _tetheringManager = NetworkOperatorTetheringManager.CreateFromConnectionProfile(profile);
+        _tetheringManager = target == null
+            ? NetworkOperatorTetheringManager.CreateFromConnectionProfile(profile)
+            : NetworkOperatorTetheringManager.CreateFromConnectionProfile(profile, target);
     }
 
     public async Task ConfigureAsync(HotspotConfig config)

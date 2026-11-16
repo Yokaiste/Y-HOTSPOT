@@ -24,6 +24,8 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<DialogService>();
         services.AddSingleton<NavigationService>();
         services.AddSingleton<WindowService>();
+        services.AddSingleton<HotspotApp.Services.Infrastructure.ManualHotspotSession>();
+        services.AddSingleton<HotspotApp.Services.Infrastructure.WslDnsRepairService>();
         services.AddSingleton<ErrorHistoryService>();
 
         // Transient Services

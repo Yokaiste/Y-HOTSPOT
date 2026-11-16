@@ -10,8 +10,39 @@
   Title=""
 >
   <Grid x:Name="RootGrid">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="36" />
+      <RowDefinition Height="*" />
+    </Grid.RowDefinitions>
+    <Grid>
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="Auto" />
+      </Grid.ColumnDefinitions>
+      <Grid x:Name="TitleDragRegion" Background="Transparent" SizeChanged="TitleDragRegion_SizeChanged">
+        <TextBlock Text="Y-HOTSPOT" Margin="16,0,12,0" VerticalAlignment="Center" />
+      </Grid>
+      <StackPanel Grid.Column="1" Orientation="Horizontal">
+        <ToggleButton x:Name="PinWindowButton" x:Uid="MainWindow_Pin"
+                      AutomationProperties.AutomationId="PinWindow" Click="PinWindow_Click"
+                      VerticalAlignment="Stretch" MinWidth="46" BorderThickness="0" CornerRadius="0">
+          <FontIcon Glyph="&#xE718;" FontSize="14" />
+        </ToggleButton>
+        <Button x:Uid="MainWindow_RestorePosition" AutomationProperties.AutomationId="RestorePosition"
+                Click="RestorePosition_Click" VerticalAlignment="Stretch" Width="46"
+                Background="Transparent" BorderThickness="0" CornerRadius="0">
+          <FontIcon Glyph="&#xE777;" FontSize="14" />
+        </Button>
+        <Button x:Uid="MainWindow_CloseToTray" AutomationProperties.AutomationId="CloseToTray"
+                VerticalAlignment="Stretch" Width="46" Background="Transparent"
+                BorderThickness="0" CornerRadius="0" Click="CloseToTray_Click">
+          <FontIcon Glyph="&#xE8BB;" FontSize="12" />
+        </Button>
+      </StackPanel>
+    </Grid>
     <NavigationView
       x:Name="NavView"
+      Grid.Row="1"
       SelectionChanged="NavView_SelectionChanged"
       Loaded="NavView_Loaded"
       MenuItemsSource="{x:Bind NavigationItems}"
@@ -39,21 +70,7 @@
               />
             </NavigationViewItem.Icon>
           </NavigationViewItem>
-          <NavigationViewItem
-            x:Uid="MainWindow_HideToTray"
-            Tapped="HideToTrayItem_Tapped"
-            SelectsOnInvoked="False"
-            Margin="0,0,0,-4"
-          >
-            <NavigationViewItem.Icon>
-              <FontIcon
-                Glyph="&#xEF2D;"
-                FontSize="16"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center"
-              />
-            </NavigationViewItem.Icon>
-          </NavigationViewItem>
+
         </StackPanel>
       </NavigationView.PaneFooter>
       <NavigationView.MenuItemTemplate>

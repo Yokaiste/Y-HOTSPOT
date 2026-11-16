@@ -8,3 +8,21 @@ Publish
 Thumbs.db
 ehthumbs.db
 desktop.ini
+# Executável e logs locais; não publicar artefatos de execução no Git.
+/dist/
+
+/tests/**/bin/
+/tests/**/obj/
+/tests/__pycache__/
+/tools/__pycache__/
+
+# Private execution state and packet captures, wherever generated.
+*.etl
+*.pcap
+*.pcapng
+**/ui.log
+**/service.log
+**/config.bin
+**/*-recovery.json
+/.vs/
+*.user

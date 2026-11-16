@@ -12,6 +12,7 @@ public static partial class WindowInterop
     public const int WsCaption = 0x00C00000;
     public const int WsExLayered = 0x80000;
     public const int WsExToolWindow = 0x00000080;
+    public const int WsExAppWindow = 0x00040000;
     public const int WsExTopmost = 0x00000008;
     public const int LwaAlpha = 0x2;
     public const uint WmApp = 0x8000;

@@ -325,7 +325,7 @@ public partial class TrayIconManager(
         _ = WindowInterop.SetWindowLong(
             hwnd,
             WindowInterop.WlExStyle,
-            _trayHostExStyle | WindowInterop.WsExToolWindow | WindowInterop.WsExLayered
+            (_trayHostExStyle & ~WindowInterop.WsExAppWindow) | WindowInterop.WsExToolWindow | WindowInterop.WsExLayered
         );
         WindowInterop.SetLayeredWindowAttributes(hwnd, 0, 0, WindowInterop.LwaAlpha);
 
@@ -419,7 +419,15 @@ public partial class TrayIconManager(
             return;
         LogTrayExitRequested();
 
-        if (await IsServiceActiveAsync())
+        bool serviceActive;
+        try { serviceActive = await Task.Run(IsServiceActiveAsync).WaitAsync(TimeSpan.FromSeconds(5)); }
+        catch (Exception ex)
+        {
+            HotspotApp.Logging.ManualTestDiagnostics.Write("Saída: consulta do serviço falhou", ex);
+            CloseFromTray();
+            return;
+        }
+        if (serviceActive)
         {
             await RunOnUiThreadAsync(async () =>
             {
@@ -471,17 +479,39 @@ public partial class TrayIconManager(
         });
     }
 
-    private void CloseFromTray()
+    private bool _closing;
+
+    private async void CloseFromTray()
     {
-        Dispose();
-        Application.Current.Exit();
+        if (_closing) return;
+        _closing = true;
+        HotspotApp.Logging.ManualTestDiagnostics.Write("Saída solicitada: pedindo desligamento ao supervisor; espera da interface limitada a 15s");
+        try
+        {
+            var session = Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions
+                .GetRequiredService<HotspotApp.Services.Infrastructure.ManualHotspotSession>(App.Services);
+            // O prazo inclui a aquisição do bloqueio e a chamada nativa inicial.
+            // Não aguardar indefinidamente nem reiniciar a placa física como fallback.
+            await session.StopAsync().WaitAsync(TimeSpan.FromSeconds(15));
+            HotspotApp.Logging.ManualTestDiagnostics.Write("Saída: teste parado e configuração restaurada");
+        }
+        catch (Exception ex)
+        {
+            HotspotApp.Logging.ManualTestDiagnostics.Write(
+                "Saída: supervisor continua independente; confirmação ainda pendente, sem reiniciar adaptadores", ex);
+        }
+        finally
+        {
+            try { Dispose(); }
+            finally { Application.Current.Exit(); }
+        }
     }
 
     private void OpenLogs()
     {
-        if (Directory.Exists(ConfigManager.ConfigFolderPath))
+        if (Directory.Exists(HotspotApp.Logging.LogPaths.DirectoryPath))
         {
-            fileExplorerService.OpenFolder(ConfigManager.ConfigFolderPath);
+            fileExplorerService.OpenFolder(HotspotApp.Logging.LogPaths.DirectoryPath);
         }
     }
 

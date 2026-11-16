@@ -4,5 +4,19 @@ Copyright 2026 Yokaiste
 Original author: Yokaiste
 Original source: https://github.com/Yokaiste/Y-HOTSPOT
 
+Fork contributions copyright 2026 Thomas Vanini
+Fork source: https://github.com/ThomasTrovon/Y-HOTSPOT
+Author link: https://linktr.ee/ThomasVanini
+Changes include localization, interface improvements, supervised sessions,
+qualified channel controls, DNS forwarding and missing-DNS DHCP repair.
+
 This project is licensed under Apache License 2.0.
 When redistributing or creating derivative works, preserve attribution to the original author and source.
+
+NDISAPI user-mode library: https://github.com/wiresock/ndisapi
+MIT license; full notice is preserved in HotspotApp/Import/ndisapi/LICENSE.txt.
+Windows Packet Filter kernel driver is a separate prerequisite and is not bundled.
+
+Wintun 0.14.1 official prebuilt DLLs: https://www.wintun.net/
+WireGuard LLC; license preserved in HotspotApp/Import/wintun/LICENSE.txt
+and in the release package's licenses directory.
